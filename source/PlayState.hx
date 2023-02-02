@@ -20,8 +20,11 @@ class PlayState extends FlxState
 		camera.zoom = 1.5;
 
 		var office = new FlxSprite(0, 0, 'assets/images/game/dev-office.png');
+		office.antialiasing = true;
+
 		var bg = new FlxSprite(0, 0);
 		bg.makeGraphic(FlxG.width, FlxG.height, FlxColor.WHITE);
+
 		DoorL.pushFrames('assets/images/game/door/dev.png', [0, 1, 2]);
 		DoorR.pushFrames('assets/images/game/door/dev.png', [0, 1, 2]);
 		DoorL.exAnimations.addByIndexes("close", [0, 1, 2], 24, false);
@@ -30,6 +33,10 @@ class PlayState extends FlxState
 		DoorR.exAnimations.addByIndexes("open", [2, 1, 0], 24, false);
 		DoorL.exAnimations.play('open', 2);
 		DoorR.exAnimations.play('open', 2);
+
+		DoorL.antialiasing = true;
+		DoorR.antialiasing = true;
+
 		office.screenCenter();
 		bg.screenCenter();
 		add(bg);
