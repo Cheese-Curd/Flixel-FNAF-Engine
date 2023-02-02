@@ -7,20 +7,20 @@ class DebugUtils
 {
 	public static function debugPos(thing:FlxObject)
 	{
-		if (FlxG.keys.justReleased.UP)
+		if (FlxG.keys.pressed.UP)
 		{
 			thing.y--;
 		}
-		if (FlxG.keys.justReleased.DOWN)
+		if (FlxG.keys.pressed.DOWN)
 		{
 			thing.y++;
 		}
 		// x \\
-		if (FlxG.keys.justReleased.RIGHT)
+		if (FlxG.keys.pressed.RIGHT)
 		{
 			thing.x++;
 		}
-		if (FlxG.keys.justReleased.LEFT)
+		if (FlxG.keys.pressed.LEFT)
 		{
 			thing.x--;
 		}
