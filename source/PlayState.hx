@@ -9,10 +9,18 @@ import flixel.util.FlxColor;
 
 class PlayState extends FlxState
 {
+	// Literally just doors and lights
 	var DoorL = new ExSprite(255, 213);
+	var DoorLLight = new FlxSprite(255, 213);
 	var DoorR = new ExSprite(833, 213);
-	var DoorLState = false; // Door Vars
+	var DoorRLight = new FlxSprite(833, 213);
+	var DoorLState = false;
+	var DoorLLightState = false;
 	var DoorRState = false;
+	var DoorRLightState = false;
+	
+	var DoorLLightBtn = new FlxSprite();
+	var DoorRLightBtn = new FlxSprite();
 
 	override public function create()
 	{
@@ -42,7 +50,9 @@ class PlayState extends FlxState
 		add(bg);
 		add(office);
 		add(DoorL);
+		add(DoorLLightBtn);
 		add(DoorR);
+		add(DoorRLightBtn);
 
 		super.create();
 	}
