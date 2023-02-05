@@ -32,11 +32,13 @@ class PlayState extends FlxState
 	var lightStart:FlxSound;
 
 	var hudCam = new FlxCamera(0, 0, FlxG.width, FlxG.height);
-	var camBtn = new FlxSprite(493, 606);
+	var camBtn = new FlxSprite(749, 638);
+	var camState = false;
 	var camSound = new FlxSound();
 	public var power:Int = 100;
 	var powerUsage:Int = 1;
 	var powerTimer:Float = 0.0;
+	var powerMult(get, never):Float;
 	var pwrPercent:FlxText = new FlxText(7, 7); // FINISH
 
 	override public function create()
@@ -49,6 +51,8 @@ class PlayState extends FlxState
 		camBtn.camera = hudCam;
 		camBtn.loadGraphic('assets/images/game/ui/camBtn.png');
 		camBtn.scale.set(0.5, 0.5);
+		camBtn.updateHitbox();
+		camBtn.scrollFactor.set();
 		add(camBtn);
 		camSound.loadEmbedded('assets/sounds/dev/cam.ogg');
 		FlxG.sound.list.add(camSound);
@@ -57,7 +61,7 @@ class PlayState extends FlxState
 		pwrPercent.setFormat('assets/fonts/VCR_OSD_MONO_1.001.ttf', 35);
 		pwrPercent.camera = hudCam;
 		add(pwrPercent);
-		pwrPercent.text = "POWER: 100%";
+		updatePowerText();
 
 		doorLLight.loadGraphic('assets/images/game/office/dev/dev-light.png');
 		doorRLight.loadGraphic('assets/images/game/office/dev/dev-light.png');
@@ -118,15 +122,6 @@ class PlayState extends FlxState
         if (!doorLLightState && !doorRLightState && lightLoop.playing)
             lightLoop.stop();
 
-		if (MouseUtils.isMouseOver(camBtn))
-		{
-			if(FlxG.mouse.justPressed)
-			{
-				// TODO: Add everything else lol
-				camSound.play();
-			}
-		}
-
 		if (doorLLightState && doorRLightState) // office shit
 			office.exAnimations.play('bothLights');
 		else if (doorLLightState)
@@ -136,30 +131,28 @@ class PlayState extends FlxState
 		else
 			office.exAnimations.play('noLights');
 
-		if (MouseUtils.isMouseOver(doorLLightBtn))
+		if (FlxG.mouse.justPressed)
 		{
-			if (FlxG.mouse.justPressed)
+			if (MouseUtils.isMouseOver(doorLLightBtn))
 			{
 				doorLLightState = !doorLLightState;
 				doorLLight.visible = doorLLightState;
-				if (doorLLightState)
-					powerUsage += 1;
-				else
-					powerUsage -=1;
-				lightStart.play();
+				recalcPowerUsage();
+				lightStart.play(true);
 			}
-		}
-		if (MouseUtils.isMouseOver(doorRLightBtn))
-		{
-			if (FlxG.mouse.justPressed)
+			if (MouseUtils.isMouseOver(doorRLightBtn))
 			{
 				doorRLightState = !doorRLightState;
 				doorRLight.visible = doorRLightState;
-				if (doorRLightState)
-					powerUsage += 1;
-				else
-					powerUsage -=1;
-				lightStart.play();
+				recalcPowerUsage();
+				lightStart.play(true);
+			}
+			if (MouseUtils.isMouseOver(camBtn))
+			{
+				// TODO: Add everything else lol
+				camState = !camState;
+				recalcPowerUsage();
+				camSound.play();
 			}
 		}
 
@@ -185,20 +178,12 @@ class PlayState extends FlxState
 		}
 
 		// Power usage
-		powerTimer += elapsed * powerUsage;
-		if(powerTimer >= 9600) // This is slow! This is from FNaF 1 lol
+		powerTimer += elapsed * powerMult;
+		if (power > 0 && powerTimer >= 9.6) // This is slow! This is from FNaF 1 lol
 		{
-			if (power <= 0)
-			{
-				power = 0; // Make sure it's not a negative
-			}
-			else
-			{
-				power -= 1;
-				trace(power);
-				powerTimer = 0.0;
-			}
-			pwrPercent.text = "POWER: " + power + "%"; // Set text
+			power--;
+			powerTimer = 0.0;
+			updatePowerText();
 		}
 		
 		#if debug
@@ -206,8 +191,32 @@ class PlayState extends FlxState
 		{
 			trace("powerTimer: " + powerTimer);
 			trace("powerUsage: " + powerUsage);
+			trace("powerMult.: " + powerMult);
 		}
 		#end
 		super.update(elapsed);
+	}
+
+	private inline function updatePowerText():Void
+	{
+		// doing this for easier debugging, you can change this if you want later -angel
+		pwrPercent.text = 'POWER: $power%\nUSAGE: ' + '|||||'.substr(0, powerUsage);
+	}
+
+	private function recalcPowerUsage():Void
+	{
+		var usage:Int = 1;
+		if (doorLLightState) usage++;
+		if (doorRLightState) usage++;
+		if (camState) usage++;
+		powerUsage = usage;
+		updatePowerText();
+	}
+
+	private inline function get_powerMult():Float
+	{
+		// Power usage drains a bit too fast, so I did some math to make it not deplete so much power -angel
+		// You can make the power drain faster by lowering the division factor, and drain slower by increasing the factor -angel
+		return (1 + (powerUsage - 1) / 1.8);
 	}
 }
