@@ -157,6 +157,20 @@ class PlayState extends FlxState
 				recalcPowerUsage();
 				lightStart.play(true);
 			}
+			if (MouseUtils.isMouseOver(doorLDoorBtn))
+			{
+				doorLState = !doorLState;
+				doorL.exAnimations.play(doorLState ? 'close' : 'open');
+				FlxG.sound.play('assets/sounds/dev/door.ogg');
+				recalcPowerUsage();
+			}
+			if (MouseUtils.isMouseOver(doorRDoorBtn))
+			{
+				doorRState = !doorRState;
+				doorR.exAnimations.play(doorRState ? 'close' : 'open');
+				FlxG.sound.play('assets/sounds/dev/door.ogg');
+				recalcPowerUsage();
+			}
 			if (MouseUtils.isMouseOver(camBtn))
 			{
 				// TODO: Add everything else lol
@@ -171,20 +185,14 @@ class PlayState extends FlxState
 			doorLState = !doorLState;
 			doorL.exAnimations.play(doorLState ? 'close' : 'open');
 			FlxG.sound.play('assets/sounds/dev/door.ogg');
-			if (doorLState)
-				powerUsage += 1;
-			else
-				powerUsage -=1;
+			recalcPowerUsage();
 		}
 		if (FlxG.keys.justPressed.D)
 		{
 			doorRState = !doorRState;
 			doorR.exAnimations.play(doorRState ? 'close' : 'open');
 			FlxG.sound.play('assets/sounds/dev/door.ogg');
-			if (doorRState)
-				powerUsage += 1;
-			else
-				powerUsage -=1;
+			recalcPowerUsage();
 		}
 
 		// Power usage
@@ -210,7 +218,7 @@ class PlayState extends FlxState
 	private inline function updatePowerText():Void
 	{
 		// doing this for easier debugging, you can change this if you want later -angel
-		pwrPercent.text = 'POWER: $power%\nUSAGE: ' + '|||||'.substr(0, powerUsage);
+		pwrPercent.text = 'POWER: $power%\nUSAGE: ' + '||||||'.substr(0, powerUsage);
 	}
 
 	private function recalcPowerUsage():Void
@@ -218,6 +226,8 @@ class PlayState extends FlxState
 		var usage:Int = 1;
 		if (doorLLightState) usage++;
 		if (doorRLightState) usage++;
+		if (doorLState) usage++;
+		if (doorRState) usage++;
 		if (camState) usage++;
 		powerUsage = usage;
 		updatePowerText();
