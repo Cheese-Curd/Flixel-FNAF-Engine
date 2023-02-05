@@ -18,16 +18,20 @@ class PlayState extends FlxState
 	var doorLLight = new FlxSprite(118, 213);
 	var doorR = new ExSprite(833, 213);
 	var doorRLight = new FlxSprite(645, 213);
+	// States
 	var doorLState = false;
 	var doorRState = false;
+	var doorLLightState = false;
+	var doorRLightState = false;
 
 	// Office
 	var office = new ExSprite(160, 5);
 
-	var doorLLightState = false; // lights
-	var doorRLightState = false;
-	var doorLLightBtn = new FlxSprite(465, 400);
-	var doorRLightBtn = new FlxSprite(785, 400);
+	//Buttons
+	var doorLLightBtn = new FlxSprite(465, 375);
+	var doorRLightBtn = new FlxSprite(785, 375);
+	var doorLDoorBtn = new FlxSprite(465, 325);
+	var doorRDoorBtn = new FlxSprite(785, 325);
 	var lightLoop:FlxSound;
 	var lightStart:FlxSound;
 
@@ -69,8 +73,11 @@ class PlayState extends FlxState
 		lightLoop = FlxG.sound.load('assets/sounds/dev/light-loop.ogg');
 		lightStart = FlxG.sound.load('assets/sounds/dev/light-start.ogg');
 		lightLoop.looped = true;
-		doorLLightBtn.makeGraphic(32, 32, FlxColor.BLACK);
-		doorRLightBtn.makeGraphic(32, 32, FlxColor.BLACK);
+		doorLLightBtn.makeGraphic(32, 32, FlxColor.WHITE);
+		doorRLightBtn.makeGraphic(32, 32, FlxColor.WHITE);
+
+		doorLDoorBtn.makeGraphic(32, 32, FlxColor.RED);
+		doorRDoorBtn.makeGraphic(32, 32, FlxColor.RED);
 
 		doorL.pushFrames('assets/images/game/door/dev.png', [0, 1, 2]); // door animations
 		doorR.pushFrames('assets/images/game/door/dev.png', [0, 1, 2]);
@@ -106,6 +113,9 @@ class PlayState extends FlxState
 
 		add(doorLLightBtn); // Light buttons
 		add(doorRLightBtn);
+				
+		add(doorLDoorBtn); // Door buttons
+		add(doorRDoorBtn);
 
 		super.create();
 	}
