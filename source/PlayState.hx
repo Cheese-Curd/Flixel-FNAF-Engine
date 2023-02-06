@@ -1,7 +1,6 @@
 package;
 
 import flixel.text.FlxText;
-import flixel.util.FlxTimer;
 import flixel.FlxCamera;
 import flixel.system.FlxSound;
 import DebugUtils;
@@ -37,13 +36,13 @@ class PlayState extends FlxState
 
 	var hudCam = new FlxCamera(0, 0, FlxG.width, FlxG.height);
 	var camBtn = new FlxSprite(749, 638);
-	var camState = false;
+	public static var camState = false;
 	var camSound = new FlxSound();
-	public var power:Int = 100;
+	public static var power:Int = 100;
 	var powerUsage:Int = 1;
 	var powerTimer:Float = 0.0;
 	var powerMult(get, never):Float;
-	var pwrPercent:FlxText = new FlxText(7, 7); // FINISH
+	var pwrPercent:FlxText = new FlxText(7, 7); // FINISH - I did, me. God I am so stupid.
 
 	override public function create()
 	{
@@ -99,12 +98,13 @@ class PlayState extends FlxState
 		doorRLight.visible = doorRLightState;
 
 		// office.screenCenter(); // Office
-		office.pushFrames('assets/images/game/office/office.png', [0, 1, 2, 3]);
+		office.pushFrames('assets/images/game/office/office.png', [0, 1, 2, 3, 4]);
 		office.antialiasing = true;
 		office.exAnimations.addByIndexes("noLights",   [0], 24, false);
 		office.exAnimations.addByIndexes("leftLights", [1], 24, false);
 		office.exAnimations.addByIndexes("rightLights",[2], 24, false);
 		office.exAnimations.addByIndexes("bothLights", [3], 24, false);
+		office.exAnimations.addByIndexes("noPower", [4], 24, false);
 		office.exAnimations.play('noLights');
 		add(office);
 
@@ -132,7 +132,9 @@ class PlayState extends FlxState
         if (!doorLLightState && !doorRLightState && lightLoop.playing)
             lightLoop.stop();
 
-		if (doorLLightState && doorRLightState) // office shit
+		if (power == 0)
+			office.exAnimations.play('noPower');
+		else if (doorLLightState && doorRLightState) // office shit
 			office.exAnimations.play('bothLights');
 		else if (doorLLightState)
 			office.exAnimations.play('leftLights');
@@ -141,7 +143,7 @@ class PlayState extends FlxState
 		else
 			office.exAnimations.play('noLights');
 
-		if (FlxG.mouse.justPressed)
+		if (FlxG.mouse.justPressed && power != 0)
 		{
 			if (MouseUtils.isMouseOver(doorLLightBtn))
 			{
@@ -171,13 +173,24 @@ class PlayState extends FlxState
 				FlxG.sound.play('assets/sounds/dev/door.ogg');
 				recalcPowerUsage();
 			}
-			if (MouseUtils.isMouseOver(camBtn))
+		}
+		
+		var hoveringCamBtn:Bool = MouseUtils.isMouseOver(camBtn, true);
+		if (camBtn.visible)
+		{
+			if (hoveringCamBtn && !camState)
 			{
-				// TODO: Add everything else lol
-				camState = !camState;
+				camState = true;
 				recalcPowerUsage();
 				camSound.play();
+				camBtn.visible = false;
+	
+				openSubState(new CameraSubState());
 			}
+		}
+		else if (!camState && !hoveringCamBtn)
+		{
+			camBtn.visible = true;
 		}
 
 		if (FlxG.keys.justPressed.A)
@@ -197,11 +210,36 @@ class PlayState extends FlxState
 
 		// Power usage
 		powerTimer += elapsed * powerMult;
-		if (power > 0 && powerTimer >= 9.6) // This is slow! This is from FNaF 1 lol
+		if (power > 0 && powerTimer >= 9.6) // stolen from FNaF 1 lol
 		{
 			power--;
 			powerTimer = 0.0;
 			updatePowerText();
+		}
+		if (power == 0)
+		{
+			if(doorLLightState)
+			{
+				doorLLightState = false;
+				doorLLight.visible = false;
+			}
+			if(doorRLightState)
+			{
+				doorRLightState = false;
+				doorRLight.visible = false;
+			}
+			if(doorLState)
+			{
+				doorLState = false;
+				doorL.exAnimations.play('open');
+				FlxG.sound.play('assets/sounds/dev/door.ogg');
+			}
+			if(doorRState)
+			{
+				doorRState = false;
+				doorR.exAnimations.play('open');
+				FlxG.sound.play('assets/sounds/dev/door.ogg');
+			}
 		}
 		
 		#if debug
@@ -221,7 +259,7 @@ class PlayState extends FlxState
 		pwrPercent.text = 'POWER: $power%\nUSAGE: ' + '||||||'.substr(0, powerUsage);
 	}
 
-	private function recalcPowerUsage():Void
+	public function recalcPowerUsage():Void
 	{
 		var usage:Int = 1;
 		if (doorLLightState) usage++;
@@ -238,5 +276,13 @@ class PlayState extends FlxState
 		// Power usage drains a bit too fast, so I did some math to make it not deplete so much power -angel
 		// You can make the power drain faster by lowering the division factor, and drain slower by increasing the factor -angel
 		return (1 + (powerUsage - 1) / 1.8);
+	}
+
+	override function closeSubState()
+	{
+		super.closeSubState();
+		camState = false;
+		camSound.play();
+		recalcPowerUsage();
 	}
 }

@@ -5,10 +5,13 @@ import flixel.FlxObject;
 
 class MouseUtils
 {
-	public static function isMouseOver(obj:FlxObject, debug:Bool = false)
+	public static function isMouseOver(obj:FlxObject, ?ignoreVisibilty:Bool = false, ?debug:Bool = false)
 	{
-		if (!obj.visible)
-			return false;
+		if (!ignoreVisibilty)
+		{
+			if (!obj.visible)
+				return false;
+		}
 
 		var objPos = obj.getScreenPosition(null, obj.camera);
 		var mousePos = FlxG.mouse.getScreenPosition(obj.camera);

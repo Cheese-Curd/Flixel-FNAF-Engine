@@ -1,32 +1,56 @@
 package;
 
-import flixel.ui.FlxButton;
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxSubState;
+import flixel.FlxCamera;
+import flixel.FlxSprite;
 
 class CameraSubState extends FlxSubState
 {
-    var justOpened = true;
+	var hudCam = new FlxCamera(0, 0, FlxG.width, FlxG.height);
+	var camBtn = new FlxSprite(749, 638);
+	
 	override public function create():Void
 	{
-		super.create();
-        justOpened = true;
-
         _parentState.persistentDraw = false; // save resources
         _parentState.persistentUpdate = true; // still want to drain power
 
-        // UNFINSIHED \\
+		super.create();
+
+		FlxG.cameras.add(hudCam, false);
+
+		camBtn.camera = hudCam;
+		camBtn.loadGraphic('assets/images/game/ui/camBtn.png');
+		camBtn.scale.set(0.5, 0.5);
+		camBtn.updateHitbox();
+		camBtn.scrollFactor.set();
+		add(camBtn);
+		camBtn.visible = false;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		if (PlayState.power == 0)
+			close();
+
+		if (camBtn.visible == false)
+		{
+			if (!MouseUtils.isMouseOver(camBtn, true))
+				camBtn.visible = true;
+		}
+		else
+		{
+			if (MouseUtils.isMouseOver(camBtn))
+				close();
+		}
 	}
 
-	// This function will be called by substate right after substate will be closed
-	public static function onSubstateClose():Void
+	override public function destroy():Void
 	{
-		// FlxG.fade(FlxG.BLACK, 1, true);
+		FlxG.cameras.remove(hudCam);
+
+		super.destroy();
 	}
 }
